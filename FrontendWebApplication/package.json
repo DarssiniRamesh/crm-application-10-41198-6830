@@ -8,8 +8,9 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "react-scripts start",
+    "start": "cross-env HOST=${HOST:-0.0.0.0} PORT=${PORT:-3000} react-scripts start",
+    "dev": "cross-env HOST=${HOST:-0.0.0.0} PORT=${PORT:-3000} react-scripts start",
+    "dev:custom": "cross-env HOST=${REACT_APP_HOST:-${HOST:-0.0.0.0}} PORT=${REACT_APP_PORT:-${PORT:-3000}} react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
