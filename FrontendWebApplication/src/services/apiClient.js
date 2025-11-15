@@ -46,11 +46,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const level = getLogLevel();
+    const env = process.env.REACT_APP_NODE_ENV || process.env.NODE_ENV;
     if (error?.response?.status === 401) {
-      // Notify all registered handlers
-      unauthorizedHandlers.forEach((h) => {
-        try { h(); } catch (e) { /* noop */ }
-      });
+      if (env === 'production') {
+        // Notify all registered handlers (production: enforce auth redirect/logout)
+        unauthorizedHandlers.forEach((h) => {
+          try { h(); } catch (e) { /* noop */ }
+        });
+      } else if (level === 'debug' || level === 'info') {
+        // eslint-disable-next-line no-console
+        console.info('API 401 received in dev/test; skipping auto-redirect.');
+      }
     } else if (level === 'debug' || level === 'info') {
       // eslint-disable-next-line no-console
       console.warn('API error:', error?.response?.status, error?.message);

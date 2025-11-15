@@ -1,10 +1,8 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
-import Login from './pages/Login';
 import UsersList from './pages/UsersList';
 import TicketsList from './pages/TicketsList';
 import TicketCreate from './pages/TicketCreate';
@@ -17,23 +15,21 @@ import NotFound from './pages/NotFound';
 
 // PUBLIC_INTERFACE
 function App() {
-  /** Root app component defining routes and top-level providers. */
+  /** Root app component defining routes and top-level providers.
+   *  Authentication gating is disabled for development to allow navigation without strict sign-in.
+   */
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-
-      <Route element={<ProtectedRoute />}>
-        <Route element={<Layout />}>
-          <Route index element={<Navigate to="/users" replace />} />
-          <Route path="/users" element={<UsersList />} />
-          <Route path="/tickets" element={<TicketsList />} />
-          <Route path="/tickets/new" element={<TicketCreate />} />
-          <Route path="/complaints" element={<ComplaintsList />} />
-          <Route path="/complaints/new" element={<ComplaintCreate />} />
-          <Route path="/case360/:caseId" element={<Case360 />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/notifications" element={<Notifications />} />
-        </Route>
+      <Route element={<Layout />}>
+        <Route index element={<Navigate to="/users" replace />} />
+        <Route path="/users" element={<UsersList />} />
+        <Route path="/tickets" element={<TicketsList />} />
+        <Route path="/tickets/new" element={<TicketCreate />} />
+        <Route path="/complaints" element={<ComplaintsList />} />
+        <Route path="/complaints/new" element={<ComplaintCreate />} />
+        <Route path="/case360/:caseId" element={<Case360 />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

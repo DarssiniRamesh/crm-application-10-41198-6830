@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 
-test('renders login page by default when unauthenticated', () => {
+test('renders Users page by default without requiring login', async () => {
   render(
     <BrowserRouter>
       <AuthProvider>
@@ -11,6 +11,6 @@ test('renders login page by default when unauthenticated', () => {
       </AuthProvider>
     </BrowserRouter>
   );
-  const heading = screen.getByRole('heading', { name: /sign in/i });
+  const heading = await screen.findByRole('heading', { name: /users/i });
   expect(heading).toBeInTheDocument();
 });

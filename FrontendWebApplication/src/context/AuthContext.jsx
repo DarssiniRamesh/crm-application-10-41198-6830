@@ -13,43 +13,59 @@ export function useAuth() {
 
 // PUBLIC_INTERFACE
 export function AuthProvider({ children }) {
-  /** Provide authentication state and actions to the app. */
+  /** Provide authentication state and actions to the app.
+   *  In non-production environments, authentication is relaxed to allow navigation without strict sign-in.
+   */
   const [token, setToken] = useState(null);
-  const isAuthenticated = !!token;
+  const env = process.env.REACT_APP_NODE_ENV || process.env.NODE_ENV;
+  const isDev = env !== 'production';
+  const isAuthenticated = isDev || !!token;
 
   // Initialize from localStorage
   useEffect(() => {
-    const saved = window.localStorage.getItem(LS_KEY);
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null;
     if (saved) {
       setToken(saved);
       setAuthToken(saved);
+    } else {
+      setAuthToken(null);
     }
   }, []);
 
-  // Register global 401 handler to force logout
+  // Register global 401 handler; in dev/test do not redirect to login
   useEffect(() => {
     const unregister = registerUnauthorizedHandler(() => {
-      // Clear token and redirect to login
-      window.localStorage.removeItem(LS_KEY);
+      // Clear token on unauthorized
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(LS_KEY);
+      }
       setToken(null);
       setAuthToken(null);
-      // Use hard redirect to ensure state reset even if router not available here
-      if (window.location.pathname !== '/login') {
-        window.location.replace('/login');
+
+      // Only enforce redirect-to-login in production
+      if (env === 'production' && typeof window !== 'undefined') {
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.info('401 detected (dev/test): token cleared, staying on current page');
       }
     });
     return unregister;
-  }, []);
+  }, [env]);
 
   // PUBLIC_INTERFACE
   const login = useCallback(async (username, password) => {
-    /** Authenticate against /login and persist JWT. */
+    /** Authenticate against /login and persist JWT (production use-case). */
     const res = await api.post('/login', { username, password });
     const received = res?.data?.token || res?.data?.access_token || res?.data?.jwt;
     if (!received) {
       throw new Error('No token returned by server');
     }
-    window.localStorage.setItem(LS_KEY, received);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LS_KEY, received);
+    }
     setToken(received);
     setAuthToken(received);
     return true;
@@ -57,8 +73,10 @@ export function AuthProvider({ children }) {
 
   // PUBLIC_INTERFACE
   const logout = useCallback(() => {
-    /** Clear JWT and reset state. */
-    window.localStorage.removeItem(LS_KEY);
+    /** Clear JWT and reset state. In dev/test, UI remains accessible due to relaxed auth. */
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(LS_KEY);
+    }
     setToken(null);
     setAuthToken(null);
   }, []);
@@ -70,12 +88,13 @@ export function AuthProvider({ children }) {
     const apiBase = getApiBase();
     // This is a stub initiation to be wired with the real backend OAuth proxy path if needed.
     const redirectUri = `${frontend}/oauth2/callback`;
-    // Fallback to a safe info message if not configured
     try {
       const url = `${apiBase}/oauth2/authorize?redirect_uri=${encodeURIComponent(redirectUri)}`;
       // eslint-disable-next-line no-console
       console.info('OAuth2 initiation stub - redirecting to:', url);
-      window.location.assign(url);
+      if (typeof window !== 'undefined') {
+        window.location.assign(url);
+      }
     } catch (e) {
       // eslint-disable-next-line no-alert
       alert('OAuth2 initiation is not configured. Please contact the administrator.');
