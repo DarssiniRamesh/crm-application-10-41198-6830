@@ -24,7 +24,7 @@ This project is configured so that when running:
 
 - `npm run dev -- --port <PORT> --host 0.0.0.0`
 
-the values passed via flags are mapped to environment variables that Create React App respects:
+the values passed via flags are mapped to environment variables that Create React App respects through a Node bootstrap:
 
 - `--port <PORT>` becomes `PORT=<PORT>`
 - `--host 0.0.0.0` becomes `HOST=0.0.0.0`
@@ -35,6 +35,8 @@ Precedence:
 - If neither is set, `HOST` defaults to `0.0.0.0` to allow external access; `PORT` falls back to CRA default (3000).
 
 Avoid forcing `PORT` or `HOST` in a local `.env` when running under an orchestrator that provides these values.
+
+This approach replaces shell-based env injection and prevents `/bin/sh: 0: Illegal option --` by avoiding passing flags to the shell.
 
 ### `npm test`
 
