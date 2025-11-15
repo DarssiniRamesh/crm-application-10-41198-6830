@@ -20,23 +20,19 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 ### Preview/Dev Server Port and Host
 
-This project is configured so that when running:
+The dev bootstrap script (`scripts/dev.js`) enforces a stable binding and swallows all CLI flags:
 
-- `npm run dev -- --port <PORT> --host 0.0.0.0`
+- HOST is always set to `0.0.0.0` (external access enabled).
+- PORT is taken from `npm_config_port` if present; otherwise defaults to `3001`.
 
-the values passed via flags are mapped to environment variables that Create React App respects through a Node bootstrap:
+Any trailing CLI flags are not passed to the shell or `react-scripts`, preventing `/bin/sh: 0: Illegal option --` errors and avoiding unexpected port/host overrides.
 
-- `--port <PORT>` becomes `PORT=<PORT>`
-- `--host 0.0.0.0` becomes `HOST=0.0.0.0`
+Examples:
+- `npm run dev` → listens on `0.0.0.0:3001`
+- `npm run dev -- --port 3001 --host 0.0.0.0` → still listens on `0.0.0.0:3001` (flags are swallowed; port is already 3001)
+- To override the port in controlled environments: `npm_config_port=3010 npm run dev` → listens on `0.0.0.0:3010`
 
-Precedence:
-- If flags are provided, they take effect via npm_config_port/npm_config_host mapping.
-- If flags are not provided, existing environment variables `PORT` and `HOST` (e.g., from the orchestrator) are used.
-- If neither is set, `HOST` defaults to `0.0.0.0` to allow external access; `PORT` falls back to CRA default (3000).
-
-Avoid forcing `PORT` or `HOST` in a local `.env` when running under an orchestrator that provides these values.
-
-This approach replaces shell-based env injection and prevents `/bin/sh: 0: Illegal option --` by avoiding passing flags to the shell.
+Note: `PORT` and `HOST` from `.env` are intentionally ignored by this script to ensure consistent preview behavior.
 
 ### `npm test`
 
