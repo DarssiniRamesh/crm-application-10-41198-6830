@@ -1,21 +1,12 @@
  // PUBLIC_INTERFACE
  /**
   * getApiBase returns the base URL for API requests.
-  * Resolution order:
-  * 1. REACT_APP_API_BASE
-  * 2. REACT_APP_BACKEND_URL
-  * 3. window.location.origin + '/api/v1'
+  *
+  * NOTE: Hardcoded per operations request to eliminate configuration drift.
+  * Environment variables and window-origin fallbacks are intentionally ignored.
   */
 export function getApiBase() {
-  const fromEnv = process.env.REACT_APP_API_BASE || process.env.REACT_APP_BACKEND_URL;
-  if (fromEnv && typeof fromEnv === 'string') {
-    return fromEnv.replace(/\/+$/, '');
-  }
-  if (typeof window !== 'undefined' && window.location && window.location.origin) {
-    return `${window.location.origin.replace(/\/+$/, '')}/api/v1`;
-  }
-  // Safe final fallback
-  return '/api/v1';
+  return 'https://vscode-internal-29664-beta.beta01.cloud.kavia.ai:3000/api/v1';
 }
 
 // PUBLIC_INTERFACE
