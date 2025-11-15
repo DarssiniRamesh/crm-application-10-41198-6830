@@ -3,46 +3,55 @@ import api, { setAuthToken, registerUnauthorizedHandler } from '../services/apiC
 import { getApiBase, getFrontendBase } from '../utils/env';
 
 const AuthContext = createContext(null);
-const LS_KEY = 'crm_auth_token';
+const LS_TOKEN_KEY = 'crm_auth_token';
+const LS_USER_KEY = 'crm_auth_user';
 
 // PUBLIC_INTERFACE
 export function useAuth() {
-  /** Access auth context: { token, isAuthenticated, login, logout, beginOAuth2 } */
+  /** Access auth context: { token, user, isAuthenticated, login, logout, beginOAuth2 } */
   return useContext(AuthContext);
 }
 
 // PUBLIC_INTERFACE
 export function AuthProvider({ children }) {
   /** Provide authentication state and actions to the app.
-   *  In non-production environments, authentication is relaxed to allow navigation without strict sign-in.
+   *  Implements a permissive demo login that accepts any non-empty credentials and sets a dummy token.
    */
   const [token, setToken] = useState(null);
-  const env = process.env.REACT_APP_NODE_ENV || process.env.NODE_ENV;
-  const isDev = env !== 'production';
-  const isAuthenticated = isDev || !!token;
+  const [user, setUser] = useState(null);
+
+  const isAuthenticated = !!token;
 
   // Initialize from localStorage
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null;
-    if (saved) {
-      setToken(saved);
-      setAuthToken(saved);
+    const savedToken = typeof window !== 'undefined' ? window.localStorage.getItem(LS_TOKEN_KEY) : null;
+    const savedUserStr = typeof window !== 'undefined' ? window.localStorage.getItem(LS_USER_KEY) : null;
+    const savedUser = savedUserStr ? safeParse(savedUserStr) : null;
+
+    if (savedToken) {
+      setToken(savedToken);
+      setAuthToken(savedToken);
     } else {
       setAuthToken(null);
     }
+    if (savedUser) {
+      setUser(savedUser);
+    }
   }, []);
 
-  // Register global 401 handler; in dev/test do not redirect to login
+  // Global 401 handler; in dev/test do not redirect automatically
   useEffect(() => {
     const unregister = registerUnauthorizedHandler(() => {
       // Clear token on unauthorized
       if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(LS_KEY);
+        window.localStorage.removeItem(LS_TOKEN_KEY);
+        window.localStorage.removeItem(LS_USER_KEY);
       }
       setToken(null);
+      setUser(null);
       setAuthToken(null);
 
-      // Only enforce redirect-to-login in production
+      const env = process.env.REACT_APP_NODE_ENV || process.env.NODE_ENV;
       if (env === 'production' && typeof window !== 'undefined') {
         if (window.location.pathname !== '/login') {
           window.location.replace('/login');
@@ -53,31 +62,43 @@ export function AuthProvider({ children }) {
       }
     });
     return unregister;
-  }, [env]);
+  }, []);
 
   // PUBLIC_INTERFACE
   const login = useCallback(async (username, password) => {
-    /** Authenticate against /login and persist JWT (production use-case). */
-    const res = await api.post('/login', { username, password });
-    const received = res?.data?.token || res?.data?.access_token || res?.data?.jwt;
-    if (!received) {
-      throw new Error('No token returned by server');
+    /** Permissive demo login: accepts any non-empty credentials, sets a dummy token and user, and proceeds. */
+    if (!username || !password) {
+      const err = new Error('Username and password are required.');
+      err.code = 'INVALID_CREDENTIALS';
+      throw err;
     }
+    const demoToken = 'demo-token';
+    const demoUser = {
+      username,
+      email: `${String(username).replace(/\s+/g, '').toLowerCase()}@demo.local`,
+      roles: ['demo'],
+      displayName: username
+    };
+
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(LS_KEY, received);
+      window.localStorage.setItem(LS_TOKEN_KEY, demoToken);
+      window.localStorage.setItem(LS_USER_KEY, JSON.stringify(demoUser));
     }
-    setToken(received);
-    setAuthToken(received);
+    setToken(demoToken);
+    setUser(demoUser);
+    setAuthToken(demoToken);
     return true;
   }, []);
 
   // PUBLIC_INTERFACE
   const logout = useCallback(() => {
-    /** Clear JWT and reset state. In dev/test, UI remains accessible due to relaxed auth. */
+    /** Clear demo token and user and reset state. */
     if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(LS_KEY);
+      window.localStorage.removeItem(LS_TOKEN_KEY);
+      window.localStorage.removeItem(LS_USER_KEY);
     }
     setToken(null);
+    setUser(null);
     setAuthToken(null);
   }, []);
 
@@ -86,7 +107,6 @@ export function AuthProvider({ children }) {
     /** Initiate OAuth2 authorization flow (stub). */
     const frontend = getFrontendBase();
     const apiBase = getApiBase();
-    // This is a stub initiation to be wired with the real backend OAuth proxy path if needed.
     const redirectUri = `${frontend}/oauth2/callback`;
     try {
       const url = `${apiBase}/oauth2/authorize?redirect_uri=${encodeURIComponent(redirectUri)}`;
@@ -103,11 +123,20 @@ export function AuthProvider({ children }) {
 
   const value = useMemo(() => ({
     token,
+    user,
     isAuthenticated,
     login,
     logout,
     beginOAuth2
-  }), [token, isAuthenticated, login, logout, beginOAuth2]);
+  }), [token, user, isAuthenticated, login, logout, beginOAuth2]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function safeParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (_) {
+    return null;
+  }
 }

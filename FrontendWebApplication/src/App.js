@@ -12,11 +12,13 @@ import Case360 from './pages/Case360';
 import Reports from './pages/Reports';
 import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
+import Login from './pages/Login';
 
 // PUBLIC_INTERFACE
 function App() {
   /** Root app component defining routes and top-level providers.
-   *  Authentication gating is disabled for development to allow navigation without strict sign-in.
+   *  Authentication gating is disabled to allow navigation without strict sign-in.
+   *  A demo login is available at /login.
    */
   return (
     <Routes>
@@ -32,6 +34,7 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
       </Route>
 
+      <Route path="/login" element={<Login />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
