@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "dev": "react-scripts start",
+    "dev": "cross-env-shell \"PORT=${npm_config_port:-$PORT} HOST=${npm_config_host:-${HOST:-0.0.0.0}} react-scripts start\"",
     "dev:port": "cross-env-shell \"PORT=${npm_config_port:-$PORT} HOST=${npm_config_host:-${HOST:-0.0.0.0}} react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",

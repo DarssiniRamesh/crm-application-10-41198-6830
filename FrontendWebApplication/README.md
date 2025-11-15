@@ -18,6 +18,24 @@ In the project directory, you can run:
 Runs the app in development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+### Preview/Dev Server Port and Host
+
+This project is configured so that when running:
+
+- `npm run dev -- --port <PORT> --host 0.0.0.0`
+
+the values passed via flags are mapped to environment variables that Create React App respects:
+
+- `--port <PORT>` becomes `PORT=<PORT>`
+- `--host 0.0.0.0` becomes `HOST=0.0.0.0`
+
+Precedence:
+- If flags are provided, they take effect via npm_config_port/npm_config_host mapping.
+- If flags are not provided, existing environment variables `PORT` and `HOST` (e.g., from the orchestrator) are used.
+- If neither is set, `HOST` defaults to `0.0.0.0` to allow external access; `PORT` falls back to CRA default (3000).
+
+Avoid forcing `PORT` or `HOST` in a local `.env` when running under an orchestrator that provides these values.
+
 ### `npm test`
 
 Launches the test runner in interactive watch mode.
