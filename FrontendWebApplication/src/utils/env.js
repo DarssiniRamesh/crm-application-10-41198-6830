@@ -6,7 +6,7 @@
   * Environment variables and window-origin fallbacks are intentionally ignored.
   */
 export function getApiBase() {
-  return 'https://vscode-internal-29664-beta.beta01.cloud.kavia.ai:3000/api/v1';
+  return 'https://vscode-internal-29664-beta.beta01.cloud.kavia.ai:3000';
 }
 
 // PUBLIC_INTERFACE
