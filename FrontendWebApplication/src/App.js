@@ -1,48 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+
+import Login from './pages/Login';
+import UsersList from './pages/UsersList';
+import TicketsList from './pages/TicketsList';
+import TicketCreate from './pages/TicketCreate';
+import ComplaintsList from './pages/ComplaintsList';
+import ComplaintCreate from './pages/ComplaintCreate';
+import Case360 from './pages/Case360';
+import Reports from './pages/Reports';
+import Notifications from './pages/Notifications';
+import NotFound from './pages/NotFound';
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
+  /** Root app component defining routes and top-level providers. */
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route index element={<Navigate to="/users" replace />} />
+          <Route path="/users" element={<UsersList />} />
+          <Route path="/tickets" element={<TicketsList />} />
+          <Route path="/tickets/new" element={<TicketCreate />} />
+          <Route path="/complaints" element={<ComplaintsList />} />
+          <Route path="/complaints/new" element={<ComplaintCreate />} />
+          <Route path="/case360/:caseId" element={<Case360 />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/notifications" element={<Notifications />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
