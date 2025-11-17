@@ -5,25 +5,26 @@
  *
  * Purpose:
  * - Force HOST to 0.0.0.0 so the server is reachable externally.
- * - Set PORT from npm_config_port if provided; otherwise default to 3001.
+ * - Determine PORT from env or npm_config_port with a safe default, while swallowing CLI flags.
  * - Swallow any trailing CLI flags and invoke react-scripts start via Node's child_process API,
  *   so the shell never receives those flags (prevents "Illegal option --" errors) and CRA won't
  *   change host/port unexpectedly.
  *
  * Usage examples:
  *   npm run dev
- *   npm run dev -- --port 3001 --host 0.0.0.0  (flags are ignored by the shell; port honored only if npm_config_port is set)
+ *   npm run dev -- --port 3001 --host 0.0.0.0  (flags are ignored by the shell; port is controlled by env/npm_config_port/default)
  */
 
-const { spawn } = require('node:child_process');
-const path = require('node:path');
+const { spawn } = require('child_process');
+const path = require('path');
 
-// Read port from npm config if provided. We intentionally ignore HOST flags and any other CLI arguments.
+// Determine effective port from env or npm config. Prefer explicit PORT/REACT_APP_PORT, then npm_config_port, then default 3000.
+const envPort = process.env.PORT || process.env.REACT_APP_PORT;
 const npmPort = process.env.npm_config_port;
 
-// Enforce binding to all interfaces; default port is 3001 unless npm_config_port is provided.
+// Enforce binding to all interfaces; select port precedence described above.
 const effectiveHost = '0.0.0.0';
-const effectivePort = npmPort || '3001';
+const effectivePort = envPort || npmPort || '3000';
 
 // Prepare environment for child process. These override any existing PORT/HOST from parent env.
 const childEnv = {

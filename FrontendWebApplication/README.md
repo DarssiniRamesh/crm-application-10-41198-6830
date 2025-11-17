@@ -23,16 +23,20 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The dev bootstrap script (`scripts/dev.js`) enforces a stable binding and swallows all CLI flags:
 
 - HOST is always set to `0.0.0.0` (external access enabled).
-- PORT is taken from `npm_config_port` if present; otherwise defaults to `3001`.
+- Port selection precedence:
+  1) `PORT` or `REACT_APP_PORT` environment variables if set
+  2) `npm_config_port` if provided (e.g., `npm_config_port=3010 npm run dev`)
+  3) Defaults to `3000`
 
 Any trailing CLI flags are not passed to the shell or `react-scripts`, preventing `/bin/sh: 0: Illegal option --` errors and avoiding unexpected port/host overrides.
 
 Examples:
-- `npm run dev` → listens on `0.0.0.0:3001`
-- `npm run dev -- --port 3001 --host 0.0.0.0` → still listens on `0.0.0.0:3001` (flags are swallowed; port is already 3001)
-- To override the port in controlled environments: `npm_config_port=3010 npm run dev` → listens on `0.0.0.0:3010`
+- `npm run dev` → listens on `0.0.0.0:3000`
+- `PORT=3001 npm run dev` → listens on `0.0.0.0:3001`
+- `npm_config_port=3010 npm run dev` → listens on `0.0.0.0:3010`
+- `npm run dev -- --port 4000` → still ignores flags; port is determined by env/`npm_config_port`/default
 
-Note: `PORT` and `HOST` from `.env` are intentionally ignored by this script to ensure consistent preview behavior.
+Note: This script intentionally ignores host/port values passed via CLI flags; use the environment variables mentioned above or `npm_config_port` to control the port.
 
 ### `npm test`
 
