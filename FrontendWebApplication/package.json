@@ -10,9 +10,9 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "cross-env HOST=0.0.0.0 PORT=3001 node scripts/dev.js",
-    "dev": "cross-env HOST=0.0.0.0 PORT=3001 node scripts/dev.js",
-    "dev:port": "node scripts/dev.js",
+    "start": "cross-env HOST=0.0.0.0 PORT=3001 BROWSER=none FAST_REFRESH=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=false node scripts/dev.js",
+    "dev": "cross-env HOST=0.0.0.0 PORT=3001 BROWSER=none FAST_REFRESH=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=false node scripts/dev.js",
+    "dev:port": "cross-env BROWSER=none FAST_REFRESH=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=false node scripts/dev.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
