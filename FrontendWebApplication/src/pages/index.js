@@ -8,3 +8,5 @@ export { default as Case360 } from './Case360';
 export { default as Reports } from './Reports';
 export { default as Notifications } from './Notifications';
 export { default as NotFound } from './NotFound';
+export { default as Dashboard } from './Dashboard';
+export { default as Settings } from './Settings';

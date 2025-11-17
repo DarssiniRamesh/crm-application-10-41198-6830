@@ -13,6 +13,8 @@ import Reports from './pages/Reports';
 import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';
 
 // PUBLIC_INTERFACE
 function App() {
@@ -23,7 +25,10 @@ function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
+        {/* Keep default landing on Users to preserve existing tests */}
         <Route index element={<Navigate to="/users" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+
         <Route path="/users" element={<UsersList />} />
         <Route path="/tickets" element={<TicketsList />} />
         <Route path="/tickets/new" element={<TicketCreate />} />
@@ -32,6 +37,7 @@ function App() {
         <Route path="/case360/:caseId" element={<Case360 />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
 
       <Route path="/login" element={<Login />} />
