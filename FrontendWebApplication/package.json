@@ -10,7 +10,7 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node scripts/dev.js",
     "dev": "node scripts/dev.js",
     "dev:port": "node scripts/dev.js",
     "build": "react-scripts build",
