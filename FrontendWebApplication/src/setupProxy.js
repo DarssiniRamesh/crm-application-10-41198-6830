@@ -14,6 +14,12 @@
  * Returns: void
  */
 module.exports = function setupProxy(app) {
+  // Log effective host/port at dev server bootstrap for readiness diagnostics
+  const host = process.env.HOST || '0.0.0.0';
+  const port = process.env.PORT || 'unknown';
+  // eslint-disable-next-line no-console
+  console.log(`[setupProxy] Health endpoints registered. HOST=${host} PORT=${port}`);
+
   // Liveness and readiness endpoints for container orchestration
   app.get("/health", (_req, res) => {
     res.status(200).type("text/plain").send("ok");

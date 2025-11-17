@@ -12,7 +12,7 @@
   "scripts": {
     "start": "cross-env HOST=0.0.0.0 PORT=3001 BROWSER=none FAST_REFRESH=true DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=true SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "dev": "cross-env HOST=0.0.0.0 PORT=3001 BROWSER=none FAST_REFRESH=true DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=true SKIP_PREFLIGHT_CHECK=true react-scripts start",
-    "dev:port": "cross-env HOST=0.0.0.0 BROWSER=none FAST_REFRESH=true DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=true SKIP_PREFLIGHT_CHECK=true react-scripts start",
+    "dev:port": "cross-env HOST=0.0.0.0 PORT=3001 BROWSER=none FAST_REFRESH=true DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true CI=true SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
