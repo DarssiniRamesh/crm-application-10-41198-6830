@@ -16,7 +16,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3001](http://localhost:3001) to view it in your browser.
 
 ### Preview/Dev Server Port and Host
 
@@ -26,12 +26,12 @@ The dev bootstrap script (`scripts/dev.js`) enforces a stable binding and swallo
 - Port selection precedence:
   1) `PORT` or `REACT_APP_PORT` environment variables if set
   2) `npm_config_port` if provided (e.g., `npm_config_port=3010 npm run dev`)
-  3) Defaults to `3000`
+  3) Defaults to `3001`
 
 Any trailing CLI flags are not passed to the shell or `react-scripts`, preventing `/bin/sh: 0: Illegal option --` errors and avoiding unexpected port/host overrides.
 
 Examples:
-- `npm run dev` → listens on `0.0.0.0:3000`
+- `npm run dev` → listens on `0.0.0.0:3001`
 - `PORT=3001 npm run dev` → listens on `0.0.0.0:3001`
 - `npm_config_port=3010 npm run dev` → listens on `0.0.0.0:3010`
 - `npm run dev -- --port 4000` → still ignores flags; port is determined by env/`npm_config_port`/default

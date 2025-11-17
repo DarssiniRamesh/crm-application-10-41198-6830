@@ -24,7 +24,7 @@ const npmPort = process.env.npm_config_port;
 
 // Enforce binding to all interfaces; select port precedence described above.
 const effectiveHost = '0.0.0.0';
-const effectivePort = envPort || npmPort || '3000';
+const effectivePort = envPort || npmPort || '3001';
 
 // Prepare environment for child process. These override any existing PORT/HOST from parent env.
 const childEnv = {
