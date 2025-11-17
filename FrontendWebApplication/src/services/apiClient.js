@@ -58,21 +58,97 @@ export function onConnectivityChange(handler) {
   return () => connectivityListeners.delete(handler);
 }
 
+// Health monitoring (exponential backoff)
+let healthTimer = null;
+let backoffMs = 1000;
+const MIN_BACKOFF = 1000;
+const MAX_BACKOFF = 30000;
+
+/**
+ * Build health URL by stripping a trailing '/api/v1' from API base and appending '/health'.
+ * Ensures https consistency and no trailing slashes.
+ */
+function getHealthUrl() {
+  const apiBase = getApiBase();
+  const base = apiBase.replace(/\/api\/v1\/?$/, '');
+  return `${base}/health`;
+}
+
 // PUBLIC_INTERFACE
-export async function pingBackend(timeoutMs = 3000) {
-  /** Pings the backend to determine reachability. Returns true if reachable, false otherwise. */
+export async function healthCheckOnce(timeoutMs = 2000) {
+  /** Perform a single lightweight /health check with a timeout. Returns true if OK, else false. */
+  const url = getHealthUrl();
+
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const id = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+
   try {
-    await api.get('/users', {
-      params: { page: 1, pageSize: 1 },
-      headers: { 'Cache-Control': 'no-cache' },
-      timeout: timeoutMs
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store',
+      credentials: 'omit',
+      headers: {
+        Accept: 'text/plain,application/json'
+      },
+      signal: ctrl ? ctrl.signal : undefined
     });
-    notifyConnectivity('up');
-    return true;
+    if (res.ok) {
+      notifyConnectivity('up');
+      return true;
+    }
+    notifyConnectivity('down');
+    return false;
   } catch (_) {
     notifyConnectivity('down');
     return false;
+  } finally {
+    if (id) clearTimeout(id);
   }
+}
+
+// PUBLIC_INTERFACE
+export function initHealthMonitor() {
+  /** Start health monitoring with retry/backoff. Safe to call multiple times (idempotent). */
+  if (healthTimer) {
+    return;
+  }
+
+  const scheduleNext = (ok) => {
+    backoffMs = ok ? 15000 : Math.min(MAX_BACKOFF, Math.max(MIN_BACKOFF, backoffMs * 2));
+    healthTimer = setTimeout(async () => {
+      healthTimer = null;
+      try {
+        const ok2 = await healthCheckOnce(ok ? 2000 : Math.min(5000, backoffMs));
+        scheduleNext(ok2);
+      } catch (_) {
+        scheduleNext(false);
+      }
+    }, backoffMs);
+  };
+
+  // Kick off immediately
+  (async () => {
+    const ok = await healthCheckOnce(1500);
+    backoffMs = ok ? 15000 : MIN_BACKOFF;
+    scheduleNext(ok);
+  })();
+}
+
+// PUBLIC_INTERFACE
+export function stopHealthMonitor() {
+  /** Stop the health monitor if running. */
+  if (healthTimer) {
+    clearTimeout(healthTimer);
+    healthTimer = null;
+  }
+  backoffMs = MIN_BACKOFF;
+}
+
+// PUBLIC_INTERFACE
+export async function pingBackend(timeoutMs = 3000) {
+  /** Backwards-compatible ping that uses the lightweight health check under the hood. */
+  return healthCheckOnce(Math.min(timeoutMs, 3000));
 }
 
 // PUBLIC_INTERFACE

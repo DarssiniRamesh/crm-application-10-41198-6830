@@ -47,6 +47,31 @@ Launches the test runner in interactive watch mode.
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
+## Backend URL and Health Monitoring
+
+The frontend calls the backend over HTTPS. The API base is resolved as follows:
+
+1. `REACT_APP_BACKEND_URL` if set (e.g., `https://your-host:3002/api/v1`)
+2. If not set, the app derives one from `window.location` by keeping the same host and switching the port to `3002`, then appending `/api/v1`
+3. If derivation fails, it defaults to:  
+   `https://vscode-internal-40318-beta.beta01.cloud.kavia.ai:3002/api/v1`
+
+A lightweight health monitor pings `${API_BASE (without /api/v1) }/health` with retry/backoff on app startup and periodically thereafter. If the backend is unreachable, a banner appears; it clears automatically once the backend becomes reachable again.
+
+CORS guidance:
+- All requests are made with `credentials: 'omit'` by default and standard JSON headers to minimize preflight issues.
+- Ensure the backend permits CORS from the frontend origin if served on a different port/host.
+
+### Environment Variables
+
+Create a `.env` file (or use your deployment system) with:
+
+- `REACT_APP_BACKEND_URL` (optional): Absolute base URL to the backend API. Example: `https://your-host:3002/api/v1`
+- `REACT_APP_FRONTEND_URL` (optional): Public URL of this SPA for OAuth2 redirects.
+- `REACT_APP_LOG_LEVEL` (optional): One of `debug`, `info` (default), `warn`, `error`.
+
+See `.env.example` for a ready-to-copy template.
+
 ## Customization
 
 ### Colors
