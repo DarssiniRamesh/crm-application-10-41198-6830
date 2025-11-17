@@ -10,8 +10,8 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "node scripts/dev.js",
-    "dev": "node scripts/dev.js",
+    "start": "cross-env HOST=0.0.0.0 PORT=3001 node scripts/dev.js",
+    "dev": "cross-env HOST=0.0.0.0 PORT=3001 node scripts/dev.js",
     "dev:port": "node scripts/dev.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
